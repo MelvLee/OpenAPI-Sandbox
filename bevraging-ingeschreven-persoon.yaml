@@ -16,36 +16,167 @@ info:
 paths:
   /ingeschrevenpersonen:
     get:
+      parameters:
+        - $ref: 'https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/parameters.yaml#/components/parameters/ExpandQueryParameter'
+        - $ref: 'https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/parameters.yaml#/components/parameters/FieldsQueryParameter'
       responses:
         '200':
-          description: "Zoekactie geslaagd"
-          headers:
-            api-version:
-              $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/api_version"
-            warning:
-              $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/warning"
-            X-Rate-Limit-Limit:
-              $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Limit"
-            X-Rate-Limit-Remaining:
-              $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Remaining"
-            X-Rate-Limit-Reset:
-              $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Reset"
-          content:
-            application/hal+json:
-              schema:
-                type: object
-                properties:
-                  _links:
-                    $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/components.yaml#/components/schemas/HalCollectionLinks"
-                  _embedded:
-                    type: object
-                    properties:
-                      ingeschrevenpersonen:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/IngeschrevenPersoon'
+          $ref: "#/components/responses/ZoekIngeschrevenPersonenResponse"
+        '400':
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/responses.yaml#/components/responses/BadRequestResponse"
+        '401':
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/responses.yaml#/components/responses/UnauthorizedResponse"
+        '403':
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/responses.yaml#/components/responses/ForbiddenResponse"
+  /ingeschrevenpersonen/{burgerservicenummer}:
+    get:
+      parameters: 
+        - $ref: "#/components/parameters/BurgerservicenummerPathParameter"
+        - $ref: 'https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/parameters.yaml#/components/parameters/ExpandQueryParameter'
+        - $ref: 'https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/parameters.yaml#/components/parameters/FieldsQueryParameter'
+      responses:
+        '200':
+          $ref: "#/components/responses/RaadpleegIngeschrevenPersoonResponse"
+        '401':
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/responses.yaml#/components/responses/UnauthorizedResponse"
+        '403':
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/responses.yaml#/components/responses/ForbiddenResponse"
+  /ingeschrevenpersonen/{burgerservicenummer}/kinderen:
+    get:
+      operationId: ingeschrevenpersonenBurgerservicenummerkinderen
+      description: "Het ophalen de kind-gegevens van een Ingeschreven Persoon zoals die op de persoonslijst voorkomen. Er vind geen sortering plaats."
+      parameters: 
+        - $ref: "#/components/parameters/BurgerservicenummerPathParameter"
+        - $ref: 'https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/parameters.yaml#/components/parameters/ExpandQueryParameter'
+        - $ref: 'https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/parameters.yaml#/components/parameters/FieldsQueryParameter'
+      responses:
+        '200':
+          $ref: "#/components/responses/ZoekKinderenResponse"
+        '401':
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/responses.yaml#/components/responses/UnauthorizedResponse"
+        '403':
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/responses.yaml#/components/responses/ForbiddenResponse"
+  /ingeschrevenpersonen/{burgerservicenummer}/kinderen/{uuid}:
+    get:
+      operationId: ingeschrevenpersonenBurgerservicenummerkinderenUuid
+      description: "Het ophalen de kind-gegevens van een Ingeschreven Persoon zoals die op de persoonslijst voorkomen."
+      parameters: 
+        - $ref: "#/components/parameters/BurgerservicenummerPathParameter"
+        - $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/parameters.yaml#/components/parameters/UUIDPathParameter"
+        - $ref: 'https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/parameters.yaml#/components/parameters/ExpandQueryParameter'
+        - $ref: 'https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/parameters.yaml#/components/parameters/FieldsQueryParameter'
+      responses:
+        '200':
+          $ref: "#/components/responses/RaadpleegKindResponse"
+        '401':
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/responses.yaml#/components/responses/UnauthorizedResponse"
+        '403':
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/responses.yaml#/components/responses/ForbiddenResponse"
 components:
+  parameters:
+    BurgerservicenummerPathParameter:
+      name: burgerservicenummer
+      in: path
+      description: "Het burgerservicenummer, bedoeld in artikel 1.1 van de Wet algemene bepalingen burgerservicenummer. Alle nummers waarvoor geldt dat, indien aangeduid als (s0 s1 s2 s3 s4 s5 s6 s7 s8), het resultaat van (9*s0) + (8*s1) + (7*s2) +...+ (2*s7) - (1*s8) deelbaar is door elf. Er moeten dus 9 cijfers aanwezig zijn."
+      required: true
+      schema:
+        type: string
+        maxLength: 9
+        minLength: 9
+  responses:
+    ZoekIngeschrevenPersonenResponse:
+      description: "Zoekactie geslaagd"
+      headers:
+        api-version:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/api_version"
+        warning:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/warning"
+        X-RateLimit-Limit:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Reset"
+      content:
+        application/hal+json:
+          schema:
+            $ref: '#/components/schemas/ZoekIngeschrevenPersonenResponseContent'
+    RaadpleegIngeschrevenPersoonResponse:
+      description: "Raadpleegactie geslaagd"
+      headers:
+        api-version:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/api_version"
+        warning:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/warning"
+        X-RateLimit-Limit:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Reset"
+      content:
+        application/hal+json:
+          schema:
+            $ref: '#/components/schemas/IngeschrevenPersoon'
+    ZoekKinderenResponse:
+      description: "Zoekactie geslaagd"
+      headers:
+        api-version:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/api_version"
+        warning:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/warning"
+        X-RateLimit-Limit:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Reset"
+      content:
+        application/hal+json:
+          schema:
+            $ref: '#/components/schemas/ZoekKinderenResponseContent'
+    RaadpleegKindResponse:
+      description: "Raadpleegactie geslaagd"
+      headers:
+        api-version:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/api_version"
+        warning:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/warning"
+        X-RateLimit-Limit:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Limit"
+        X-RateLimit-Remaining:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Remaining"
+        X-RateLimit-Reset:
+          $ref: "https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/headers.yaml#/components/headers/X-RateLimit-Reset"
+      content:
+        application/hal+json:
+          schema:
+            $ref: '#/components/schemas/Kind'
   schemas:
+    ZoekIngeschrevenPersonenResponseContent:
+      type: object
+      properties:
+        _links:
+          $ref: 'https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/components.yaml#/components/schemas/HalCollectionLinks'
+        _embedded:
+          type: object
+          properties:
+            ingeschrevenpersonen:
+              type: array
+              items:
+                $ref: '#/components/schemas/IngeschrevenPersoon'
+    ZoekKinderenResponseContent:
+      type: object
+      properties:
+        _links:
+          $ref: 'https://raw.githubusercontent.com/MelvLee/OpenAPI-Sandbox/master/components.yaml#/components/schemas/HalCollectionLinks'
+        _embedded:
+          type: object
+          properties:
+            kinderen:
+              type: array
+              items:
+                $ref: '#/components/schemas/Kind'
     IngeschrevenPersoon:
       type: "object"
       description: "Categorie 01/51 Gegevens over de ingeschrevene."
@@ -71,3 +202,28 @@ components:
           maxLength: 9
           minLength: 9
           example: "555555021"
+    Kind:
+      type: "object"
+      description: "09/59 Gegevens over een kind van de ingeschrevene."
+      properties:
+        aktenummer:
+          type: "string"
+          title: "aktenummer"
+          description: "Element 81.20 Een aanduiding van de akte die is opgenomen\
+            \ in de registers van de burgerlijke stand in Nederland. De eerste drie\
+            \ posities van het aktenummer dienen conform [Tabel 39,Tabel Akteaanduiding](https://publicaties.rvig.nl/dsresource?objectid=4796&amp;type=org)\
+            \ te zijn. De laatste 4 posities bevatten een volgnummer van de akte."
+          maxLength: 7
+        burgerservicenummer:
+          type: "string"
+          title: "Burgerservicenummer"
+          description: "Het burgerservicenummer, bedoeld in artikel 1.1 van de Wet\
+            \ algemene bepalingen burgerservicenummer. Element 01.20 Het burgerservicenummer,\
+            \ bedoeld in artikel 1.1 van de Wet algemene bepalingen burgerservicenummer.\
+            \ Alle nummers waarvoor geldt dat, indien aangeduid als (s0 s1 s2 s3 s4\
+            \ s5 s6 s7 s8), het resultaat van (9*s0) + (8*s1) + (7*s2) +...+ (2*s7)\
+            \ - (1*s8) deelbaar is door elf. Er moeten dus 9 cijfers aanwezig zijn."
+          pattern: "^[0-9]{9}$"
+          maxLength: 9
+          minLength: 9
+          example: "430422088"
