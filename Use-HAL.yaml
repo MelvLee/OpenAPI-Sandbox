@@ -1,0 +1,135 @@
+openapi: 3.0.0
+
+paths:
+  /resources:
+    get:
+      responses:
+        '200':
+          description: zoeken geslaagd
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/HalResources'
+  /resources/{naam}:
+    get:
+      parameters:
+      - in: path
+        name: naam
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: raadplegen geslaagd
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/HalResource'
+
+components:
+  schemas:
+    Resource:
+      description: een resource zonder HAL properties
+      type: object
+      properties:
+        naam:
+          type: string
+
+    Subresource:
+      description: een subresource zonder HAL properties
+      type: object
+      properties:
+        naam:
+          type: string
+        omschrijving:
+          type: string
+
+    AnotherSubresource:
+      description: een ander subresource zonder HAL properties
+      type: object
+      properties:
+        naam:
+          type: string
+        omschrijving:
+          type: string
+
+    HalSubresource:
+      description: Subresource met HAL properties en geen sub-resources
+      allOf:
+      - $ref: "#/components/schemas/Subresource"
+      - type: object
+      properties:
+        _links:
+            $ref: "HAL.yaml#/components/schemas/HalSelfLink"
+
+    HalAnotherSubresource:
+      description: Een subresource met HAL properties en geen sub-resources
+      allOf:
+      - $ref: "#/components/schemas/AnotherSubresource"
+      - type: object
+      properties:
+        _links:
+            $ref: "HAL.yaml#/components/schemas/HalSelfLink"
+
+    HalResource_Links:
+      description: de specificatie van de _links property van HalResource. Dit zorgt ervoor dat er een class met de naam HalResource_Links of HalResourceLinks wordt gegenereerd i.p.v. een willekeurige resources naam. De properties kunnen links zijn naar een zelfde type subresource of de link naar een specifieke subresource
+      allOf:
+      - $ref: "HAL.yaml#/components/schemas/HalCollectionLink"
+      - type: object
+      properties:
+        subresources:
+          type: array
+          items:
+            $ref: "HAL.yaml#/components/schemas/HalLink"
+        anothersubresource:
+            $ref: "HAL.yaml#/components/schemas/HalLink"
+
+    HalResource_Embedded:
+      description: de specificatie van de _embedded property van HalResource. Dit zorgt ervoor dat er een class met de naam HalResource_Embedded of HalResourceEmbedded wordt gegenereerd i.p.v. een willekeurige resources naam
+      type: object
+      properties:
+        subresources:
+          type: array
+          items:
+            $ref: "#/components/schemas/HalSubresource"
+        anothersubresource:
+            $ref: "#/components/schemas/HalAnotherSubresource"
+
+    HalResource:
+      description: een resource met HAL properties en Subresource sub-resources
+      allOf:
+      - $ref: "#/components/schemas/Resource"
+      - type: object
+      properties:
+        _links:
+          $ref: "#/components/schemas/HalResource_Links"
+        _embedded:
+          $ref: "#/components/schemas/HalResource_Embedded"
+
+    HalResources_Links:
+      description: de specificatie van de _links property van HalResources. Dit zorgt ervoor dat er een class met de naam HalResources_Links of HalResourcesLinks wordt gegenereerd i.p.v. een willekeurige resources naam
+      allOf:
+      - $ref: "HAL.yaml#/components/schemas/HalCollectionLink"
+      - type: object
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: "HAL.yaml#/components/schemas/HalLink"
+
+    HalResources_Embedded:
+      description: de specificatie van de _embedded property van HalResources. Dit zorgt ervoor dat er een class met de naam HalResources_Embedded of HalResourcesEmbedded wordt gegenereerd i.p.v. een willekeurige resources naam
+      type: object
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: "#/components/schemas/HalResource"
+
+    HalResources:
+      type: object
+      properties:
+        _links:
+          $ref: "#/components/schemas/HalResources_Links"
+        _embedded:
+          $ref: "#/components/schemas/HalResources_Embedded"

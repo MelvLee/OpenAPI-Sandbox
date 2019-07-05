@@ -1,0 +1,73 @@
+openapi: 3.0.0
+
+info:
+  title: HAL components + voor HAL resources
+  description: Specificatie van de HAL components + voorbeeld resources die gebruik maken van de HAL components
+  version: '1'
+
+components:
+
+  schemas:
+    Href:
+      description: Deze niet gebruiken omdat editor.swagger.io niet de correcte code genereert
+      type: string
+      format: uri
+      example: "datapunt.voorbeeldgemeente.nl/api/v1/resourcename/123456789"
+
+    HalLink:
+      description: De Link Object zoals gespecificeerd in https://tools.ietf.org/html/draft-kelly-json-hal-08#section-5
+      type: object
+      required:
+        - href
+      properties:
+        href:
+          type: string
+          format: uri
+        templated:
+          type: boolean
+          nullable: true
+        type:
+          type: string
+        deprecation:
+          type: string
+          format: uri
+        name:
+          type: string
+        profile:
+          type: string
+          format: uri
+        title:
+          type: string
+        hreflang:
+          type: string
+
+    HalSelfLink:
+      description: property voor een resource die alleen een self link heeft
+      type: object
+      required:
+      - self
+      properties:
+        self:
+          $ref: "#/components/schemas/HalLink"
+
+    HalCollectionLink:
+      description: properties voor een resources collection. M.b.v. de find property kan een url template aangegeven waarmee een specifieke resource (in de collectie) kan worden bevraagd. Zie https://tools.ietf.org/html/draft-kelly-json-hal-08#section-6 voor een voorbeeld
+      allOf:
+      - $ref: "#/components/schemas/HalSelfLink"
+      - type: object
+      properties:
+        find:
+          $ref: "#/components/schemas/HalLink"
+
+    HalPaginationLinks:
+      description: properties voor een resources collection waarbij paginering wordt ondersteund
+      allOf:
+      - $ref: "#/components/schemas/HalCollectionLink"
+      - type: object
+        properties:
+          first:
+            $ref: "#/components/schemas/HalLink"
+          previous:
+            $ref: "#/components/schemas/HalLink"
+          next:
+            $ref: "#/components/schemas/HalLink"
