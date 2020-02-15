@@ -1,0 +1,155 @@
+openapi: '3.0.0'
+info:
+  title: oneOf property vs voor elke type een property vs één property voor alle types
+  version: 1.0.0
+paths:
+  /tenaamstellingenOneOf:
+    get:
+      description: |
+        oneOf om aan te geven dat persoon kan zijn:
+        - een KadasterNatuurlijkPersoon,
+        - een KadasterNietNatuurlijkPersoon of
+        - een IngeschrevenPersoon
+
+        Voordelen:
+        - expressief. Uit de definitie kan worden opgemaakt dat één persoon ten name kan worden gesteld
+        
+        Nadelen:
+        - extra schema object (AbstractPersoon) nodig als base type voor de oneOf schema objecten
+        - gegenereerde code is niet correct als de base type (AbstractPersoon) niet als eerste $ref in de oneOf wordt toegevoegd
+      responses:
+        '200':
+          description: zoek actie geslaagd
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/TenaamstellingOneOf'
+  /tenaamstellingenElkeOneOfEenEigenProperty:
+    get:
+      description: |
+        een property voor elke persoon type en voor elke persoon type een schema object
+        
+        Voordelen:
+        - geen extra schema object nodig als base type voor de persoon types
+        - code generatie werkt
+        
+        Nadelen:
+        - documentatie is nodig om aan te geven dat slechts één van de persoon type properties een waarde kan hebben
+      responses:
+        '200':
+          description: zoek actie geslaagd
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/TenaamstellingElkeOneOfEenEigenProperty'
+  /tenaamstellingen:
+    get:
+      description: |
+        één schema object voor de persoon types en een persoon enum type
+        
+        Voordelen:
+        - uit de definitie kan worden opgemaakt dat één persoon ten name kan worden gesteld
+        - code generatie werkt
+        
+        Nadelen:
+        - een enum type nodig om aan te geven welke persoon types ten name kan worden gesteld
+        - als de persoon Resources niet allemaal een identificatie property hebben, dan is waarschijnlijk documentatie nodig om aan te geven welke waarde (bsn, rsin, etc) in de identificatie wordt ingevuld
+      responses:
+        '200':
+          description: zoek actie geslaagd
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/Tenaamstelling'
+components:
+  schemas:
+    TenaamstellingOneOf:
+      type: object
+      properties:
+        persoon:
+          oneOf:
+          - $ref: '#/components/schemas/AbstractPersoon'
+          - $ref: '#/components/schemas/KadasterNatuurlijkPersoonOneOfVersie'
+          - $ref: '#/components/schemas/KadasterNietNatuurlijkPersoonOneOfVersie'
+          - $ref: '#/components/schemas/IngeschrevenNatuurlijkPersoonOneOfVersie'
+    TenaamstellingElkeOneOfEenEigenProperty:
+      type: object
+      properties:
+        kadasterNatuurlijkPersoon:
+          $ref: '#/components/schemas/KadasterNatuurlijkPersoon'
+        kadasterNietNatuurlijkPersoon:
+          $ref: '#/components/schemas/KadasterNietNatuurlijkPersoon'
+        ingeschrevenNatuurlijkPersoon:
+          $ref: '#/components/schemas/IngeschrevenNatuurlijkPersoon'
+    Tenaamstelling:
+      type: object
+      properties:
+        persoon:
+          $ref: '#/components/schemas/Persoon'
+    AbstractPersoon:
+      type: object
+      discriminator:
+        propertyName: persoonType
+    KadasterNatuurlijkPersoonOneOfVersie:
+      allOf:
+      - $ref: '#/components/schemas/AbstractPersoon'
+      - type: object
+        properties:
+          identificatie:
+            type: string
+          naam:
+            type: string
+    KadasterNietNatuurlijkPersoonOneOfVersie:
+      allOf:
+      - $ref: '#/components/schemas/AbstractPersoon'
+      - type: object
+        properties:
+          identificatie:
+            type: string
+          naam:
+            type: string
+    IngeschrevenNatuurlijkPersoonOneOfVersie:
+      allOf:
+      - $ref: '#/components/schemas/AbstractPersoon'
+      - type: object
+        properties:
+          burgerservicenummer:
+            type: string
+          geslachtsnaam:
+            type: string
+    KadasterNatuurlijkPersoon:
+      type: object
+      properties:
+        identificatie:
+          type: string
+        naam:
+          type: string
+    KadasterNietNatuurlijkPersoon:
+      type: object
+      properties:
+        identificatie:
+          type: string
+        naam:
+          type: string
+    IngeschrevenNatuurlijkPersoon:
+      type: object
+      properties:
+        burgerservicenummer:
+          type: string
+        geslachtsnaam:
+          type: string
+    Persoon:
+      type: object
+      properties:
+        identificatie:
+          type: string
+        naam:
+          type: string
+        type:
+          $ref: '#/components/schemas/PersoonType_enum'
+    PersoonType_enum:
+      type: string
+      enum:
+        - KadasterNatuurlijkPersoon
+        - KadasterNietNatuurlijkPersoon
+        - IngeschrevenNatuurlijkPersoon
